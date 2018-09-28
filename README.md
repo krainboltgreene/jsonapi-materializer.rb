@@ -5,37 +5,6 @@
   - [![Version](http://img.shields.io/gem/v/jsonapi-materializer.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-materializer)
 
 
-  - [ ] Content Negotiation
-    - [ ] Client Responsibilities
-    - [ ] Server Responsibilities
-  - [ ] Document Structure
-    - [ ] Top Level
-    - [ ] Resource Objects
-    - [ ] Resource Identifier Objects
-    - [ ] Compound Documents
-    - [ ] Meta Information
-    - [ ] Links
-    - [ ] JSON API Object
-    - [ ] Member Names
-  - [ ] Fetching Data
-    - [ ] Fetching Resources
-    - [ ] Fetching Relationships
-    - [ ] Inclusion of Related Resources
-    - [ ] Sparse Fieldsets
-    - [ ] Sorting
-    - [ ] Pagination
-    - [ ] Filtering
-  - [ ] Creating, Updating and Deleting Resources
-    - [ ] Creating Resources
-    - [ ] Updating Resources
-    - [ ] Updating Relationships
-    - [ ] Deleting Resources
-  - [ ] Query Parameters
-  - [ ] Errors
-    - [ ] Processing Errors
-    - [ ] Error Objects
-
-
 
 ## Using
 
@@ -59,7 +28,7 @@
 
 ### jsonapi-home
 
-I'm already using jsonapi-materializer and it's sister project jsonapi-realizer in a new gem of mine that allows services to be discoverable: [jsonapi-home](https://github.com/krainboltgreene/jsonapi-home.rb).
+I'm already using jsonapi-materializer and it's sister project [jsonapi-realizer](https://github.com/krainboltgreene/jsonapi-realizer.rb) in a new gem of mine that allows services to be discoverable: [jsonapi-home](https://github.com/krainboltgreene/jsonapi-home.rb).
 
 
 ## Installing

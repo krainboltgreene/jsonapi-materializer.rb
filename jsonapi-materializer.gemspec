@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.version = JSONAPI::Materializer::VERSION
   spec.authors = ["Kurtis Rainbolt-Greene"]
   spec.email = ["kurtis@rainbolt-greene.online"]
-  spec.summary = %q{}
+  spec.summary = %q{A way to turn data models into outbound json:api responses}
   spec.description = spec.summary
   spec.homepage = "http://krainboltgreene.github.io/jsonapi-materializer"
   spec.license = "ISC"
