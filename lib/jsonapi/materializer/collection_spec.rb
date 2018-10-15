@@ -2,7 +2,7 @@ require("spec_helper")
 
 RSpec.describe JSONAPI::Materializer::Collection do
   let(:described_class) {ArticleMaterializer::Collection}
-  let(:collection) {described_class.new(:objects => objects, :includes => [["comments"], ["author"]])}
+  let(:collection) {described_class.new(:object => object, :includes => [["comments"], ["author"]])}
 
   describe("#as_json") do
     subject {collection.as_json.deep_stringify_keys}
@@ -18,7 +18,7 @@ RSpec.describe JSONAPI::Materializer::Collection do
     end
 
     context "when the list has items" do
-      let(:objects) {Kaminari.paginate_array(Article.all).page(1).per(1)}
+      let(:object) {Kaminari.paginate_array(Article.all).page(1).per(1)}
 
       it("has a data key at root with the resources") do
         expect(subject.fetch("data")).to(eq([{
@@ -55,8 +55,8 @@ RSpec.describe JSONAPI::Materializer::Collection do
       it("has a links key at root with pagination") do
         expect(subject.fetch("links")).to(eq(
           "self" => "http://example.com/articles",
-          "next" => "http://example.com/articles?page[offset]=2&page[per]=1",
-          "last" => "http://example.com/articles?page[offset]=3&page[per]=1"
+          "next" => "http://example.com/articles?page[offset]=2&page[limit]=1",
+          "last" => "http://example.com/articles?page[offset]=3&page[limit]=1"
         ))
       end
 
@@ -65,6 +65,7 @@ RSpec.describe JSONAPI::Materializer::Collection do
           {
             "id" => "5",
             "type" => "comments",
+            "attributes"=>{"body"=>"First!"},
             "relationships" => {
               "author" => {"data" => {"id" => "2", "type" => "people"}, "links" => {"self" => "http://example.com/comments/5/relationships/author", "related" => "http://example.com/comments/5/author"}},
               "article" => {"data" => {"id" => "1", "type" => "articles"}, "links" => {"self" => "http://example.com/comments/5/relationships/article", "related" => "http://example.com/comments/5/article"}}
@@ -74,6 +75,7 @@ RSpec.describe JSONAPI::Materializer::Collection do
           {
             "id" => "12",
             "type" => "comments",
+            "attributes"=>{"body"=>"I like XML better"},
             "relationships" => {
               "author" => {"data" => {"id" => "9", "type" => "people"}, "links" => {"self" => "http://example.com/comments/12/relationships/author", "related" => "http://example.com/comments/12/author"}},
               "article" => {"data" => {"id" => "1", "type" => "articles"}, "links" => {"self" => "http://example.com/comments/12/relationships/article", "related" => "http://example.com/comments/12/article"}}
@@ -83,6 +85,7 @@ RSpec.describe JSONAPI::Materializer::Collection do
           {
             "id" => "9",
             "type" => "people",
+            "attributes"=>{"name"=>"Dan Gebhardt"},
             "relationships" => {
               "comments" => {"data" => [{"id" => "12", "type" => "comments"}], "links" => {"self" => "http://example.com/people/9/relationships/comments", "related" => "http://example.com/people/9/comments"}},
               "articles" => {

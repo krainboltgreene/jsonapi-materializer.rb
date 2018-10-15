@@ -1,46 +1,47 @@
 module JSONAPI
   module Materializer
     module Resource
+      require_relative("resource/attribute")
+      require_relative("resource/relation")
       require_relative("resource/relationship")
+      require_relative("resource/configuration")
 
       extend(ActiveSupport::Concern)
+      include(ActiveModel::Model)
 
-      included do
-        include(ActiveModel::Model)
+      attr_accessor(:object)
+      attr_writer(:selects)
+      attr_writer(:includes)
 
-        unless const_defined?("Collection")
-          self::Collection = Class.new do
-            include(JSONAPI::Materializer::Collection)
-          end
-        end
+      def initialize(**keyword_arguments)
+        super(**keyword_arguments)
 
-        @attributes = {}
-        @relations = {}
-
-        origin(JSONAPI::Materializer.configuration.default_origin)
-        identifier(JSONAPI::Materializer.configuration.default_identifier)
-
-        has(:id)
-
-        attr_accessor(:object)
-        attr_writer(:selects)
-        attr_writer(:includes)
+        validate!
       end
 
       def as_data
         {
-          :id => id.to_s,
-          :type => type.to_s,
-          :attributes => attributes.
-            select {|_, value| value.selectable}.
-            slice(*selects).
+          :id => id,
+          :type => type,
+          :attributes => exposed(attributes.except(:id)).
             transform_values {|attribute| object.public_send(attribute.from)},
-          :relationships => relations.
+          :relationships => exposed(relations).
             transform_values {|relation| relation.using(self).as_json},
           :links => {
             :self => links_self
           }
         }.transform_values(&:presence).compact
+      end
+
+      private def exposed(mapping)
+        if selects.any?
+          mapping.
+            select {|_, value| value.visible}.
+            slice(*selects.dig(type))
+        else
+          mapping.
+            select {|_, value| value.visible}
+        end
       end
 
       def as_json(*)
@@ -58,23 +59,31 @@ module JSONAPI
       end
 
       def type
-        self.class.instance_variable_get(:@type).to_s
+        self.class.configuration.type.to_s
       end
 
       private def attributes
-        self.class.instance_variable_get(:@attributes)
+        self.class.configuration.attributes
       end
 
-      def attribute(name)
-        attributes.fetch(name.to_sym).for(object)
+      private def origin
+        self.class.configuration.origin
+      end
+
+      private def identifier
+        self.class.configuration.identifier
       end
 
       private def relations
-        self.class.instance_variable_get(:@relations)
+        self.class.configuration.relations
+      end
+
+      def attribute(name)
+        self.class.attribute(name)
       end
 
       def relation(name)
-        relations.fetch(name.to_sym).for(object)
+        self.class.relation(name)
       end
 
       def links_self
@@ -83,16 +92,8 @@ module JSONAPI
         ).pattern
       end
 
-      private def origin
-        self.class.instance_variable_get(:@origin)
-      end
-
-      private def identifier
-        self.class.instance_variable_get(:@identifier)
-      end
-
       private def selects
-        @selects || attributes.select {|_, value| value.selectable}.keys
+        (@selects || {}).transform_values{|list| list.map(&:to_sym)}
       end
 
       private def includes
@@ -100,15 +101,6 @@ module JSONAPI
       end
 
       private def included
-        includes.flat_map do |path|
-          path.reduce(materializer) do |subject, key|
-            if subject.is_a?(Array)
-              subject.map {|related_subjet| related_subjet.relation(key)}
-            else
-              subject.relation(key)
-            end
-          end
-        end.uniq.map(&:as_data)
         includes.flat_map do |path|
           path.reduce(self) do |subject, key|
             if subject.is_a?(Array)
@@ -120,9 +112,27 @@ module JSONAPI
         end.map(&:as_data)
       end
 
+      included do
+        unless const_defined?("Collection")
+          self::Collection = Class.new do
+            include(JSONAPI::Materializer::Collection)
+          end
+        end
+
+        @attributes = {}
+        @relations = {}
+
+        validates_presence_of(:object)
+
+        origin(JSONAPI::Materializer.configuration.default_origin)
+        identifier(JSONAPI::Materializer.configuration.default_identifier)
+
+        has(JSONAPI::Materializer.configuration.default_identifier)
+      end
+
       class_methods do
         def identifier(value)
-          @identifier = value
+          @identifier = value.to_sym
         end
 
         def origin(value)
@@ -130,19 +140,54 @@ module JSONAPI
         end
 
         def type(value)
-          @type = value
+          @type = value.to_sym
         end
 
-        def has(name, from: name, selectable: false)
-          @attributes[name] = Attribute.new(:name => name, :from => from, :selectable => selectable)
+        def has(name, from: name, visible: true)
+          @attributes[name] = Attribute.new(
+            :name => name,
+            :from => from,
+            :visible => visible
+          )
         end
 
-        def has_one(name, from: name, class_name:, includable: false)
-          @relations[name] = Relation.new(:type => :one, :name => name, :from => from, :class_name => class_name, :includable => includable)
+        def has_one(name, from: name, class_name:, visible: true)
+          @relations[name] = Relation.new(
+            :type => :one,
+            :name => name,
+            :from => from,
+            :class_name => class_name,
+            :visible => visible
+          )
         end
 
-        def has_many(name, from: name, class_name:, includable: false)
-          @relations[name] = Relation.new(:type => :many, :name => name, :from => from, :class_name => class_name, :includable => includable)
+        def has_many(name, from: name, class_name:, visible: true)
+          @relations[name] = Relation.new(
+            :type => :many,
+            :name => name,
+            :from => from,
+            :class_name => class_name,
+            :visible => visible
+          )
+        end
+
+        def configuration
+          @configuration ||= Configuration.new({
+            :owner => self,
+            :type => @type,
+            :origin => @origin,
+            :identifier => @identifier,
+            :attributes => @attributes,
+            :relations => @relations
+          })
+        end
+
+        def attribute(name)
+          configuration.attributes.fetch(name.to_sym){raise(Error::ResourceRelationshipNotFound, name: name, materializer: self)}
+        end
+
+        def relation(name)
+          configuration.relations.fetch(name.to_sym){raise(Error::ResourceRelationshipNotFound, name: name, materializer: self)}
         end
       end
     end

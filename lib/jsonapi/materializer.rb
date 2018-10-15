@@ -14,12 +14,15 @@ module JSONAPI
     require_relative("materializer/version")
     require_relative("materializer/error")
     require_relative("materializer/configuration")
-    require_relative("materializer/attribute")
-    require_relative("materializer/relation")
+    require_relative("materializer/controller")
+
+    @configuration ||= Configuration.new(
+      :default_invalid_accept_exception => JSONAPI::Materializer::Error::InvalidAcceptHeader,
+      :default_missing_accept_exception => JSONAPI::Materializer::Error::MissingAcceptHeader,
+      :default_identifier => :id
+    )
     require_relative("materializer/collection")
     require_relative("materializer/resource")
-
-    @configuration ||= Configuration.new
 
     def self.configuration
       if block_given?

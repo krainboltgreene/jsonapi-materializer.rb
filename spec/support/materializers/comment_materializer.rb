@@ -6,5 +6,5 @@ class CommentMaterializer
   has_one(:author, :from => :account, :class_name => "AccountMaterializer")
   has_one(:article, :class_name => "ArticleMaterializer")
 
-  has(:title)
+  has(:body)
 end

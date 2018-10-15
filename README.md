@@ -21,14 +21,14 @@
 
 
 
-### rails and pundit and jsonapi-realizers
+### pundit
 
 
 
 
-### jsonapi-home
+### Sister Projects
 
-I'm already using jsonapi-materializer and it's sister project [jsonapi-realizer](https://github.com/krainboltgreene/jsonapi-realizer.rb) in a new gem of mine that allows services to be discoverable: [jsonapi-home](https://github.com/krainboltgreene/jsonapi-home.rb).
+I'm already using jsonapi-materializer. and it's sister project [jsonapi-realizer](https://github.com/krainboltgreene/jsonapi-realizer.rb) in a new gem of mine that allows services to be discoverable: [jsonapi-home](https://github.com/krainboltgreene/jsonapi-home.rb).
 
 
 ## Installing

@@ -4,43 +4,41 @@ module JSONAPI
       SELF_TEMPLATE = "{origin}/{type}".freeze
 
       extend(ActiveSupport::Concern)
+      include(ActiveModel::Model)
 
-      included do
-        include(ActiveModel::Model)
+      attr_accessor(:object)
+      attr_writer(:selects)
+      attr_writer(:includes)
+      attr_writer(:pagination)
 
-        attr_accessor(:objects)
-        attr_writer(:selects)
-        attr_writer(:includes)
-      end
-
-      delegate(:first_page?, :to => :objects)
-      delegate(:prev_page, :to => :objects)
-      delegate(:total_pages, :to => :objects)
-      delegate(:next_page, :to => :objects)
-      delegate(:last_page?, :to => :objects)
-      delegate(:limit_value, :to => :objects)
+      delegate(:first_page?, :to => :object)
+      delegate(:prev_page, :to => :object)
+      delegate(:total_pages, :to => :object)
+      delegate(:next_page, :to => :object)
+      delegate(:last_page?, :to => :object)
+      delegate(:limit_value, :to => :object)
 
       def as_json(*)
         {
           :links => {
-            :first => unless first_page? then links_pagination.expand(:offset => 1, :per => limit_value).to_s end,
-            :prev => unless first_page? then links_pagination.expand(:offset => prev_page, :per => limit_value).to_s end,
+            :first => unless first_page? then links_pagination.expand(:offset => 1, :limit => limit_value).to_s end,
+            :prev => unless first_page? then links_pagination.expand(:offset => prev_page, :limit => limit_value).to_s end,
             :self => links_self,
-            :next => unless last_page? then links_pagination.expand(:offset => next_page, :per => limit_value).to_s end,
-            :last => unless last_page? then links_pagination.expand(:offset => total_pages, :per => limit_value).to_s end
+            :next => unless last_page? then links_pagination.expand(:offset => next_page, :limit => limit_value).to_s end,
+            :last => unless last_page? then links_pagination.expand(:offset => total_pages, :limit => limit_value).to_s end
           }.compact,
           :data => resources,
           :included => included
-        }.transform_values {|value| value.presence || value}.compact
+        }.transform_values(&:presence).compact
       end
 
       private def materializers
-        objects.map {|object| self.class.parent.new(:object => object)}
+        object.map {|object| self.class.parent.new(:object => object, :selects => selects, :includes => includes)}
       end
 
       private def links_pagination
         Addressable::Template.new(
-          "#{origin}/#{type}?page[offset]={offset}&page[per]={per}"
+          "#{origin}/#{type}?page[offset]={offset}&page[limit]={limit}"
         )
       end
 
@@ -63,7 +61,7 @@ module JSONAPI
       end
 
       private def selects
-        @selects || self.class.parent.selectables.keys
+        @selects
       end
 
       private def includes
@@ -75,9 +73,9 @@ module JSONAPI
           includes.flat_map do |path|
             path.reduce(materializer) do |subject, key|
               if subject.is_a?(Array)
-                subject.map {|related_subjet| related_subjet.relation(key)}
+                subject.map {|related_subject| related_subject.relation(key).for(related_subject.object)}
               else
-                subject.relation(key)
+                subject.relation(key).for(subject.object)
               end
             end
           end

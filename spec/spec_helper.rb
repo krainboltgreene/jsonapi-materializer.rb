@@ -11,6 +11,7 @@ end
 
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
 
+require_relative("support/models/application_record")
 require_relative("support/models/article")
 require_relative("support/models/account")
 require_relative("support/models/comment")
@@ -42,28 +43,7 @@ RSpec.configure do |let|
   let.default_formatter = "doc"
 
   let.before(:each) do
-    ActiveRecord::Migration.create_table(:articles, :force => true) do |table|
-      table.text :title, :null => false
-      table.references :account
-      table.timestamps :null => false
-    end
-  end
-
-  let.before(:each) do
-    ActiveRecord::Migration.create_table(:comments, :force => true) do |table|
-      table.text :body, :null => false
-      table.references :account
-      table.references :article
-      table.timestamps :null => false
-    end
-  end
-
-  let.before(:each) do
-    ActiveRecord::Migration.create_table(:accounts, :force => true) do |table|
-      table.text :name, :null => false
-      table.text :twitter, :null => false
-      table.timestamps :null => false
-    end
+    ApplicationRecord.descendants.each(&:setup!)
   end
 
   let.around(:each) do |example|

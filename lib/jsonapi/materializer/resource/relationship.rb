@@ -7,14 +7,23 @@ module JSONAPI
         attr_accessor(:related)
         attr_accessor(:parent)
 
+        validates_presence_of(:related)
+        validates_presence_of(:parent)
+
+        def initialize(**keyword_arguments)
+          super(**keyword_arguments)
+
+          validate!
+        end
+
         def as_json(*)
           {
-            "data" => data,
-            "links" => {
-              "self" => links_self,
-              "related" => links_related
+            :data => data,
+            :links => {
+              :self => links_self,
+              :related => links_related
             },
-            "meta" => {}
+            :meta => {}
           }.transform_values(&:presence).compact
         end
 
@@ -36,14 +45,14 @@ module JSONAPI
           if related.many?
             related_parent_materializer.map do |child|
               {
-                "id" => child.attribute("id").to_s,
-                "type" => child.type.to_s
+                :id => child.attribute("id").for(child.object).to_s,
+                :type => child.type.to_s
               }
             end
           else
             {
-              "id" => related_parent_materializer.attribute("id").to_s,
-              "type" => related_parent_materializer.type.to_s
+              :id => related_parent_materializer.attribute("id").for(related_parent_materializer.object).to_s,
+              :type => related_parent_materializer.type.to_s
             }
           end
         end
