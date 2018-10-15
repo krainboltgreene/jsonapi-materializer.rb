@@ -49,7 +49,7 @@ RSpec.configure do |let|
   let.around(:each) do |example|
     ActiveRecord::Base.transaction do
       example.run
-      raise ActiveRecord::Rollback
+      raise(ActiveRecord::Rollback)
     end
   end
 end

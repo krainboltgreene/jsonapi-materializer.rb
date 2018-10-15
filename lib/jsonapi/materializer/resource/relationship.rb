@@ -40,7 +40,7 @@ module JSONAPI
         end
 
         private def data
-          return unless related_parent_materializer.present?
+          return if related_parent_materializer.blank?
 
           if related.many?
             related_parent_materializer.map do |child|

@@ -93,7 +93,7 @@ module JSONAPI
       end
 
       private def selects
-        (@selects || {}).transform_values{|list| list.map(&:to_sym)}
+        (@selects || {}).transform_values {|list| list.map(&:to_sym)}
       end
 
       private def includes
@@ -172,22 +172,22 @@ module JSONAPI
         end
 
         def configuration
-          @configuration ||= Configuration.new({
+          @configuration ||= Configuration.new(
             :owner => self,
             :type => @type,
             :origin => @origin,
             :identifier => @identifier,
             :attributes => @attributes,
             :relations => @relations
-          })
+          )
         end
 
         def attribute(name)
-          configuration.attributes.fetch(name.to_sym){raise(Error::ResourceRelationshipNotFound, name: name, materializer: self)}
+          configuration.attributes.fetch(name.to_sym) {raise(Error::ResourceRelationshipNotFound, :name => name, :materializer => self)}
         end
 
         def relation(name)
-          configuration.relations.fetch(name.to_sym){raise(Error::ResourceRelationshipNotFound, name: name, materializer: self)}
+          configuration.relations.fetch(name.to_sym) {raise(Error::ResourceRelationshipNotFound, :name => name, :materializer => self)}
         end
       end
     end

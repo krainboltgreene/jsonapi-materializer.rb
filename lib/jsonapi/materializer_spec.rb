@@ -1,4 +1,4 @@
 require("spec_helper")
 
-RSpec.describe JSONAPI::Materializer do
+RSpec.describe(JSONAPI::Materializer) do
 end

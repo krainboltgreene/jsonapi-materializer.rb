@@ -1,6 +1,6 @@
 require("spec_helper")
 
-RSpec.describe JSONAPI::Materializer::Resource do
+RSpec.describe(JSONAPI::Materializer::Resource) do
   let(:resource) {ArticleMaterializer.new(:object => Article.find(1))}
 
   before do

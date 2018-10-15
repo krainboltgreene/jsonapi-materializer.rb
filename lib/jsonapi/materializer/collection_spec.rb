@@ -1,6 +1,6 @@
 require("spec_helper")
 
-RSpec.describe JSONAPI::Materializer::Collection do
+RSpec.describe(JSONAPI::Materializer::Collection) do
   let(:described_class) {ArticleMaterializer::Collection}
   let(:collection) {described_class.new(:object => object, :includes => [["comments"], ["author"]])}
 
@@ -17,7 +17,7 @@ RSpec.describe JSONAPI::Materializer::Collection do
       Comment.create!(:id => 12, :body => "I like XML better", :article => Article.find(1), :account => Account.find(9))
     end
 
-    context "when the list has items" do
+    context("when the list has items") do
       let(:object) {Kaminari.paginate_array(Article.all).page(1).per(1)}
 
       it("has a data key at root with the resources") do
