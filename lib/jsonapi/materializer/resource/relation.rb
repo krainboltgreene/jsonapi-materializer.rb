@@ -22,10 +22,22 @@ module JSONAPI
           validate!
         end
 
-        def for(object)
+        def for(subject)
           case type
-          when :many then object.public_send(from).map {|related_object| materializer_class.new(:object => related_object)}
-          when :one then if object.public_send(from).present? then materializer_class.new(:object => object.public_send(from)) end
+          when :many then
+            subject.object.public_send(from).map do |related_object|
+              materializer_class.new(
+                **subject.raw,
+                :object => related_object
+              )
+            end
+          when :one then
+            if subject.object.public_send(from).present?
+              materializer_class.new(
+                **subject.raw,
+                :object => subject.object.public_send(from)
+              )
+            end
           end
         end
 

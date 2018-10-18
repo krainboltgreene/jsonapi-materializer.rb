@@ -73,9 +73,9 @@ module JSONAPI
           includes.flat_map do |path|
             path.reduce(materializer) do |subject, key|
               if subject.is_a?(Array)
-                subject.map {|related_subject| related_subject.relation(key).for(related_subject.object)}
+                subject.map {|related_subject| related_subject.relation(key).for(related_subject)}
               else
-                subject.relation(key).for(subject.object)
+                subject.relation(key).for(subject)
               end
             end
           end

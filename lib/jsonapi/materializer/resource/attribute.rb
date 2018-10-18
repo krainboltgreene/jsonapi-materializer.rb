@@ -18,8 +18,8 @@ module JSONAPI
           validate!
         end
 
-        def for(object)
-          object.public_send(from)
+        def for(subject)
+          subject.object.public_send(from)
         end
 
         private def materializer_class

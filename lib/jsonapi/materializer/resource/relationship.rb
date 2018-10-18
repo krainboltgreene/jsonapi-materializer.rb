@@ -45,20 +45,20 @@ module JSONAPI
           if related.many?
             related_parent_materializer.map do |child|
               {
-                :id => child.attribute("id").for(child.object).to_s,
+                :id => child.attribute("id").for(child).to_s,
                 :type => child.type.to_s
               }
             end
           else
             {
-              :id => related_parent_materializer.attribute("id").for(related_parent_materializer.object).to_s,
+              :id => related_parent_materializer.attribute("id").for(related_parent_materializer).to_s,
               :type => related_parent_materializer.type.to_s
             }
           end
         end
 
         private def related_parent_materializer
-          related.for(parent.object)
+          related.for(parent)
         end
       end
     end
