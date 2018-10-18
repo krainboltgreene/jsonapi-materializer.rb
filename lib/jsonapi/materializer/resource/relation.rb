@@ -14,7 +14,7 @@ module JSONAPI
         validates_presence_of(:type)
         validates_presence_of(:from)
         validates_presence_of(:class_name)
-        validates_inclusion_of(:visible, :in => [true, false])
+        validate(:visible_callable)
 
         def initialize(**keyword_arguments)
           super(**keyword_arguments)
@@ -43,6 +43,14 @@ module JSONAPI
 
         private def materializer_class
           class_name.constantize
+        end
+
+        private def visible_callable
+          return if [true, false].include?(visible)
+          return if visible.is_a?(Symbol)
+          return if visible.respond_to?(:call)
+
+          errors.add(:visible, "not callable or boolean")
         end
       end
     end
