@@ -4,12 +4,14 @@ module JSONAPI
       class Relation
         include(ActiveModel::Model)
 
+        attr_accessor(:owner)
         attr_accessor(:name)
         attr_accessor(:type)
         attr_accessor(:from)
         attr_accessor(:class_name)
         attr_accessor(:visible)
 
+        validates_presence_of(:owner)
         validates_presence_of(:name)
         validates_presence_of(:type)
         validates_presence_of(:from)

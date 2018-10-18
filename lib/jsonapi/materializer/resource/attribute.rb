@@ -4,10 +4,12 @@ module JSONAPI
       class Attribute
         include(ActiveModel::Model)
 
+        attr_accessor(:owner)
         attr_accessor(:name)
         attr_accessor(:from)
         attr_accessor(:visible)
 
+        validates_presence_of(:owner)
         validates_presence_of(:name)
         validates_presence_of(:from)
         validate(:visible_callable)

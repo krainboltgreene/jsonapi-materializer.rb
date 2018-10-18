@@ -166,6 +166,7 @@ module JSONAPI
 
         def has(name, from: name, visible: true)
           @attributes[name] = Attribute.new(
+            :owner => self,
             :name => name,
             :from => from,
             :visible => visible
@@ -174,6 +175,7 @@ module JSONAPI
 
         def has_one(name, from: name, class_name:, visible: true)
           @relations[name] = Relation.new(
+            :owner => self,
             :type => :one,
             :name => name,
             :from => from,
@@ -184,6 +186,7 @@ module JSONAPI
 
         def has_many(name, from: name, class_name:, visible: true)
           @relations[name] = Relation.new(
+            :owner => self,
             :type => :many,
             :name => name,
             :from => from,
