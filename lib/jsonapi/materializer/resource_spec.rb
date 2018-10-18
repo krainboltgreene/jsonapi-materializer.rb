@@ -15,49 +15,51 @@ RSpec.describe(JSONAPI::Materializer::Resource) do
     subject {resource.as_json.deep_stringify_keys}
 
     it("returns a JSON:API standards compliant payload") do
-      expect(subject).to(eq(
-        "links" => {
-          "self" => "http://example.com/articles/1"
-        },
-        "data" => {
-          "id" => "1",
-          "type" => "articles",
-          "attributes" => {
-            "title" => "JSON API paints my bikeshed!"
+      expect(subject).to(
+        eq(
+          "links" => {
+            "self" => "http://example.com/articles/1"
           },
-          "relationships" => {
-            "author" => {
-              "data" => {
-                "id" => "9",
-                "type" => "people"
+          "data" => {
+            "id" => "1",
+            "type" => "articles",
+            "attributes" => {
+              "title" => "JSON API paints my bikeshed!"
+            },
+            "relationships" => {
+              "author" => {
+                "data" => {
+                  "id" => "9",
+                  "type" => "people"
+                },
+                "links" => {
+                  "self" => "http://example.com/articles/1/relationships/author",
+                  "related" => "http://example.com/articles/1/author"
+                }
               },
-              "links" => {
-                "self" => "http://example.com/articles/1/relationships/author",
-                "related" => "http://example.com/articles/1/author"
+              "comments" => {
+                "data" => [
+                  {
+                    "id" => "5",
+                    "type" => "comments"
+                  },
+                  {
+                    "id" => "12",
+                    "type" => "comments"
+                  }
+                ],
+                "links" => {
+                  "self" => "http://example.com/articles/1/relationships/comments",
+                  "related" => "http://example.com/articles/1/comments"
+                }
               }
             },
-            "comments" => {
-              "data" => [
-                {
-                  "id" => "5",
-                  "type" => "comments"
-                },
-                {
-                  "id" => "12",
-                  "type" => "comments"
-                }
-              ],
-              "links" => {
-                "self" => "http://example.com/articles/1/relationships/comments",
-                "related" => "http://example.com/articles/1/comments"
-              }
+            "links" => {
+                "self" => "http://example.com/articles/1"
             }
-          },
-          "links" => {
-              "self" => "http://example.com/articles/1"
           }
-        }
-      ))
+        )
+      )
     end
   end
 end
