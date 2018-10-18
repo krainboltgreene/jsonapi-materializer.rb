@@ -22,6 +22,7 @@ module JSONAPI
       :default_identifier => :id
     )
     require_relative("materializer/collection")
+    require_relative("materializer/context")
     require_relative("materializer/resource")
 
     def self.configuration

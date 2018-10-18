@@ -12,10 +12,15 @@ module JSONAPI
       attr_accessor(:object)
       attr_writer(:selects)
       attr_writer(:includes)
+      attr_writer(:context)
+      attr_reader(:raw)
 
       def initialize(**keyword_arguments)
         super(**keyword_arguments)
 
+        @raw = keyword_arguments
+
+        context.validate!
         validate!
       end
 
@@ -92,12 +97,16 @@ module JSONAPI
         ).pattern
       end
 
-      private def selects
+      def selects
         (@selects || {}).transform_values {|list| list.map(&:to_sym)}
       end
 
-      private def includes
+      def includes
         @includes || []
+      end
+
+      def context
+        self.class.const_get("Context").new(**@context || {})
       end
 
       private def included
@@ -116,6 +125,18 @@ module JSONAPI
         unless const_defined?("Collection")
           self::Collection = Class.new do
             include(JSONAPI::Materializer::Collection)
+          end
+        end
+
+        unless const_defined?("Context")
+          self::Context = Class.new do
+            include(JSONAPI::Materializer::Context)
+
+            def initialize(**keyword_arguments)
+              keyword_arguments.keys.each(&singleton_class.method(:attr_accessor))
+
+              super(**keyword_arguments)
+            end
           end
         end
 
@@ -169,6 +190,10 @@ module JSONAPI
             :class_name => class_name,
             :visible => visible
           )
+        end
+
+        def context
+          const_get("Context")
         end
 
         def configuration

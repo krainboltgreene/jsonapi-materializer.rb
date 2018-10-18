@@ -2,7 +2,7 @@ require("spec_helper")
 
 RSpec.describe(JSONAPI::Materializer::Collection) do
   let(:described_class) {ArticleMaterializer::Collection}
-  let(:collection) {described_class.new(:object => object, :includes => [["comments"], ["author"]])}
+  let(:collection) {described_class.new(:object => object, :includes => [["comments"], ["author"]], :context => {:policy => true})}
 
   describe("#as_json") do
     subject {collection.as_json.deep_stringify_keys}

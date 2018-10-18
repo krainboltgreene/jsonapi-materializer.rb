@@ -6,5 +6,11 @@ class AccountMaterializer
   has_many(:comments, :class_name => "CommentMaterializer")
   has_many(:articles, :class_name => "ArticleMaterializer")
 
-  has(:name)
+  has(:name, :visible => :visible_attribute?)
+
+  context.validates_presence_of(:policy)
+
+  private def visible_attribute?(attribute)
+     context.policy.read_attribute(attribute.from)
+  end
 end
