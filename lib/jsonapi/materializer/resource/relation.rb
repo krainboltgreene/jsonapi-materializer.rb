@@ -25,22 +25,30 @@ module JSONAPI
         end
 
         def for(subject)
-          case type
+          @for ||= {}
+          @for[subject] ||= case type
           when :many then
-            subject.object.public_send(from).map do |related_object|
+            unlessing(fetch_relation(subject), :loaded?) do |subject|
+              subject.select(:id)
+            end.map do |related_object|
               materializer_class.new(
                 **subject.raw,
                 :object => related_object
               )
             end
           when :one then
-            if subject.object.public_send(from).present?
+            if fetch_relation(subject).present?
               materializer_class.new(
                 **subject.raw,
-                :object => subject.object.public_send(from)
+                :object => fetch_relation(subject)
               )
             end
           end
+        end
+
+        private def fetch_relation(subject)
+          @fetch_relationship ||= {}
+          @fetch_relationship[subject] ||= subject.object.public_send(from)
         end
 
         def using(parent)
@@ -65,6 +73,14 @@ module JSONAPI
           return if visible.respond_to?(:call)
 
           errors.add(:visible, "not callable or boolean")
+        end
+
+        private def unlessing(subject, condition)
+          unless subject.public_send(condition)
+            yield(subject)
+          else
+            subject
+          end
         end
       end
     end
