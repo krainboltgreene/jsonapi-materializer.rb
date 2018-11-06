@@ -34,7 +34,7 @@ module JSONAPI
       end
 
       private def materializers
-        object.map {|object| self.class.parent.new(:object => object, :selects => selects, :includes => includes, :context => context)}
+        @materializers ||= object.map {|subobject| self.class.parent.new(:object => subobject, :selects => selects, :includes => includes, :context => context)}
       end
 
       private def links_pagination
@@ -58,7 +58,7 @@ module JSONAPI
       end
 
       private def resources
-        materializers.map(&:as_data)
+        @resources ||= materializers.map(&:as_data)
       end
 
       private def selects
@@ -70,7 +70,7 @@ module JSONAPI
       end
 
       private def included
-        materializers.flat_map do |materializer|
+        @included ||= materializers.flat_map do |materializer|
           includes.flat_map do |path|
             path.reduce(materializer) do |subject, key|
               if subject.is_a?(Array)
