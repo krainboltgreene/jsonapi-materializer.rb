@@ -113,9 +113,9 @@ module JSONAPI
         @included ||= includes.flat_map do |path|
           path.reduce(self) do |subject, key|
             if subject.is_a?(Array)
-              subject.map {|related_subjet| related_subjet.relation(key)}
+              subject.map {|related_subject| related_subject.relation(key).for(subject)}
             else
-              subject.relation(key)
+              subject.relation(key).for(subject)
             end
           end
         end.map(&:as_data)
