@@ -22,11 +22,11 @@ module JSONAPI
       def as_json(*)
         {
           :links => {
-            :first => unless first_page? then links_pagination.expand(:offset => 1, :limit => limit_value).to_s end,
-            :prev => unless first_page? then links_pagination.expand(:offset => prev_page, :limit => limit_value).to_s end,
-            :self => links_self,
-            :next => unless last_page? then links_pagination.expand(:offset => next_page, :limit => limit_value).to_s end,
-            :last => unless last_page? then links_pagination.expand(:offset => total_pages, :limit => limit_value).to_s end
+            :first => unless total_pages.zero? || first_page? then links_pagination.expand(:offset => 1, :limit => limit_value).to_s end,
+            :prev => unless total_pages.zero? || first_page? then links_pagination.expand(:offset => prev_page, :limit => limit_value).to_s end,
+            :self => unless total_pages.zero? then links_self end,
+            :next => unless total_pages.zero? || last_page? then links_pagination.expand(:offset => next_page, :limit => limit_value).to_s end,
+            :last => unless total_pages.zero? || last_page? then links_pagination.expand(:offset => total_pages, :limit => limit_value).to_s end
           }.compact,
           :data => resources,
           :included => included
