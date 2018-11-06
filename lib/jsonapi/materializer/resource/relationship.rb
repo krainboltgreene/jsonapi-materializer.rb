@@ -42,7 +42,7 @@ module JSONAPI
         private def data
           return if related_parent_materializer.blank?
 
-          if related.many?
+          @data ||= if related.many?
             related_parent_materializer.map do |child|
               {
                 :id => child.attribute("id").for(child).to_s,
