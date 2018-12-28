@@ -9,6 +9,36 @@ module JSONAPI
       extend(ActiveSupport::Concern)
       include(ActiveModel::Model)
 
+      MIXIN_HOOK = ->(*) do
+        @attributes = {}
+        @relations = {}
+
+        unless const_defined?("Collection")
+          self::Collection = Class.new do
+            include(JSONAPI::Materializer::Collection)
+          end
+        end
+
+        unless const_defined?("Context")
+          self::Context = Class.new do
+            include(JSONAPI::Materializer::Context)
+
+            def initialize(**keyword_arguments)
+              keyword_arguments.keys.each(&singleton_class.method(:attr_accessor))
+
+              super(**keyword_arguments)
+            end
+          end
+        end
+
+        validates_presence_of(:object)
+
+        origin(JSONAPI::Materializer.configuration.default_origin)
+        identifier(JSONAPI::Materializer.configuration.default_identifier)
+
+        has(JSONAPI::Materializer.configuration.default_identifier)
+      end
+
       attr_accessor(:object)
       attr_writer(:selects)
       attr_writer(:includes)
@@ -41,11 +71,11 @@ module JSONAPI
       private def exposed(mapping)
         if selects.any?
           mapping.
-            select {|_, value| value.visible}.
+            select {|_, value| value.visible?(self)}.
             slice(*selects.dig(type))
         else
           mapping.
-            select {|_, value| value.visible}
+            select {|_, value| value.visible?(self)}
         end
       end
 
@@ -122,36 +152,14 @@ module JSONAPI
       end
 
       included do
-        unless const_defined?("Collection")
-          self::Collection = Class.new do
-            include(JSONAPI::Materializer::Collection)
-          end
-        end
-
-        unless const_defined?("Context")
-          self::Context = Class.new do
-            include(JSONAPI::Materializer::Context)
-
-            def initialize(**keyword_arguments)
-              keyword_arguments.keys.each(&singleton_class.method(:attr_accessor))
-
-              super(**keyword_arguments)
-            end
-          end
-        end
-
-        @attributes = {}
-        @relations = {}
-
-        validates_presence_of(:object)
-
-        origin(JSONAPI::Materializer.configuration.default_origin)
-        identifier(JSONAPI::Materializer.configuration.default_identifier)
-
-        has(JSONAPI::Materializer.configuration.default_identifier)
+        class_eval(&MIXIN_HOOK) unless @abstract_class
       end
 
       class_methods do
+        def inherited(object)
+          object.class_eval(&MIXIN_HOOK) unless object.instance_variable_defined?(:@abstract_class)
+        end
+
         def identifier(value)
           @identifier = value.to_sym
         end

@@ -4,22 +4,21 @@
   - [![Downloads](http://img.shields.io/gem/dtv/jsonapi-materializer.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-materializer)
   - [![Version](http://img.shields.io/gem/v/jsonapi-materializer.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-materializer)
 
-jsonapi-materializer is a way to turn data objects (for example, active record models) into json:api specification responses. Largely the class doesn't care what it's given, as long as it responds to certain properties.
+jsonapi-materializer is a way to turn data objects (for example, active record models) into json:api responses. Largely the library doesn't care *what* it's given, as long as it responds to certain calls.
 
 
 ## Using
 
-To start, lets say we have a simple rails application setup, with the model first:
+Lets say we have a simple rails application setup for our project. We'll define the model first:
 
 ``` ruby
 class Account < ApplicationRecord
   has_many(:articles)
   has_many(:comments)
 
-  def self.setup!
+  def self.schema
     ActiveRecord::Migration.create_table(:accounts, :force => true) do |table|
       table.text(:name, :null => false)
-      table.text(:twitter, :null => false)
       table.timestamps(:null => false)
     end
   end
@@ -52,7 +51,7 @@ JSONAPI::Materializer.configuration do |let|
 end
 ```
 
-Now you need to define a materializer, which is a class that determines how and what to return as a json:api payload:
+Now you need to define a materializer, which is a class that determines how and what to return as a json:api response:
 
 ``` ruby
 class AccountMaterializer
@@ -127,7 +126,7 @@ There is *nothing* specific about rails for this library, it can be used in any 
   0. A place to store the configuration at boot (rails initializers)
 
 
-### policy (aka pundit)
+### policies (aka pundit)
 
 If you're using some sort of policy logic like pundit you'll have the ability to pass it as a context to the materializer:
 
@@ -154,10 +153,10 @@ class AccountMaterializer
 
   has_many(:reviews, :class_name => "ReviewMaterializer")
 
-  has(:name, :visible => :visible_attribute?)
+  has(:name, :visible => :readable_attribute?)
 
-  private def visible_attribute?(attribute)
-     context.policy.read_attribute(attribute.from)
+  private def readable_attribute?(attribute)
+    context.policy.read_attribute?(attribute.from)
   end
 end
 ```
@@ -173,12 +172,12 @@ class AccountMaterializer
 
   has_many(:reviews, :class_name => "ReviewMaterializer")
 
-  has(:name, :visible => :visible_attribute?)
+  has(:name, :visible => :readable_attribute?)
 
-  context.validate_presence_of(:policy)
+  context.validates_presence_of(:policy)
 
-  private def visible_attribute?(attribute)
-     context.policy.read_attribute(attribute.from)
+  private def readable_attribute?(attribute)
+     context.policy.read_attribute?(attribute.from)
   end
 end
 ```

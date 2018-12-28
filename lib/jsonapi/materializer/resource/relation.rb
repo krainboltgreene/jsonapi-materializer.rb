@@ -46,6 +46,14 @@ module JSONAPI
           end
         end
 
+        def visible?(subject)
+          return visible if [true, false].include?(visible)
+          return subject.send(visible, self) if visible.is_a?(Symbol)
+          return visible.call(self) if visible.respond_to?(:call)
+
+          true
+        end
+
         private def fetch_relation(subject)
           @fetch_relationship ||= {}
           @fetch_relationship[subject] ||= subject.object.public_send(from)
