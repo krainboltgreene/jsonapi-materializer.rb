@@ -26,9 +26,9 @@ module JSONAPI
 
         def for(subject)
           @for ||= {}
-          @for[subject] ||= case type
+          @for[checksum(subject)] ||= case type
           when :many then
-            unlessing(fetch_relation(subject), :loaded?) do |subject|
+            unlessing(fetch_relation(subject), -> {subject.includes.any? {|included| included.include?(from.to_s)} || fetch_relation(subject).loaded?}) do |subject|
               subject.select(:id)
             end.map do |related_object|
               materializer_class.new(
@@ -56,7 +56,7 @@ module JSONAPI
 
         private def fetch_relation(subject)
           @fetch_relationship ||= {}
-          @fetch_relationship[subject] ||= subject.object.public_send(from)
+          @fetch_relationship[checksum(subject)] ||= subject.object.public_send(from)
         end
 
         def using(parent)
@@ -83,12 +83,23 @@ module JSONAPI
           errors.add(:visible, "not callable or boolean")
         end
 
-        private def unlessing(subject, condition)
-          unless subject.public_send(condition)
-            yield(subject)
+        private def unlessing(object, proc)
+          unless proc.call()
+            yield(object)
           else
-            subject
+            object
           end
+        end
+
+        private def checksum(subject)
+          [
+            from,
+            materializer_class,
+            name,
+            owner,
+            subject,
+            type
+          ].hash
         end
       end
     end
