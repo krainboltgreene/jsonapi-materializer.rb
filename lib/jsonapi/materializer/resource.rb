@@ -219,7 +219,7 @@ module JSONAPI
         end
 
         def attribute(name)
-          configuration.attributes.fetch(name.to_sym) {raise(Error::ResourceRelationshipNotFound, :name => name, :materializer => self)}
+          configuration.attributes.fetch(name.to_sym) {raise(Error::ResourceAttributeNotFound, :name => name, :materializer => self)}
         end
 
         def relation(name)
