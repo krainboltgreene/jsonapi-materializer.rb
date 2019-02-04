@@ -41,6 +41,7 @@ module JSONAPI
 
       attr_accessor(:object)
       attr_writer(:selects)
+      attr_writer(:pagination)
       attr_writer(:includes)
       attr_writer(:context)
       attr_reader(:raw)
