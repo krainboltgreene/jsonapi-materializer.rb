@@ -26,8 +26,8 @@ module JSONAPI
 
         def visible?(subject)
           return visible if [true, false].include?(visible)
-          return subject.send(visible, self) if visible.is_a?(Symbol)
-          return visible.call(self) if visible.respond_to?(:call)
+          return subject.send(visible, :attribute, self) if visible.is_a?(Symbol)
+          return visible.call(:attribute, self) if visible.respond_to?(:call)
 
           true
         end
