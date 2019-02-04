@@ -31,7 +31,7 @@ module JSONAPI
           end
         end
 
-        validates_presence_of(:object)
+        validates_presence_of(:object, allow_blank: true)
 
         origin(JSONAPI::Materializer.configuration.default_origin)
         identifier(JSONAPI::Materializer.configuration.default_identifier)
