@@ -1,7 +1,7 @@
 require("spec_helper")
 
 RSpec.describe(JSONAPI::Materializer::Resource) do
-  let(:resource) {ArticleMaterializer.new(:object => Article.find(1), :context => {:policy => true})}
+  let(:resource) {ArticleMaterializer.new(:object => Article.find(1))}
 
   before do
     Account.create!(:id => 9, :name => "Dan Gebhardt", :twitter => "dgeb")

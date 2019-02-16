@@ -10,7 +10,6 @@ module JSONAPI
       attr_writer(:selects)
       attr_writer(:includes)
       attr_writer(:pagination)
-      attr_accessor(:context)
 
       delegate(:first_page?, :to => :object)
       delegate(:prev_page, :to => :object)
@@ -34,7 +33,7 @@ module JSONAPI
       end
 
       private def materializers
-        @materializers ||= object.map {|subobject| self.class.parent.new(:object => subobject, :selects => selects, :includes => includes, :context => context)}
+        @materializers ||= object.map {|subobject| self.class.parent.new(:object => subobject, :selects => selects, :includes => includes)}
       end
 
       private def links_pagination

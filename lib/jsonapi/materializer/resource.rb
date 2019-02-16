@@ -19,18 +19,6 @@ module JSONAPI
           end
         end
 
-        unless const_defined?("Context")
-          self::Context = Class.new do
-            include(JSONAPI::Materializer::Context)
-
-            def initialize(**keyword_arguments)
-              keyword_arguments.keys.each(&singleton_class.method(:attr_accessor))
-
-              super(**keyword_arguments)
-            end
-          end
-        end
-
         validates_presence_of(:object, allow_blank: true)
 
         origin(JSONAPI::Materializer.configuration.default_origin)
@@ -42,7 +30,6 @@ module JSONAPI
       attr_accessor(:object)
       attr_writer(:selects)
       attr_writer(:includes)
-      attr_writer(:context)
       attr_reader(:raw)
 
       def initialize(**keyword_arguments)
@@ -50,7 +37,6 @@ module JSONAPI
 
         @raw = keyword_arguments
 
-        context.validate!
         validate!
       end
 
@@ -70,12 +56,9 @@ module JSONAPI
 
       private def exposed(mapping)
         if selects.any?
-          mapping.
-            select {|_, value| value.visible?(self)}.
-            slice(*selects.dig(type))
+          mapping.slice(*selects.dig(type))
         else
-          mapping.
-            select {|_, value| value.visible?(self)}
+          mapping
         end
       end
 
@@ -135,10 +118,6 @@ module JSONAPI
         @includes || []
       end
 
-      def context
-        self.class.const_get("Context").new(**@context || {})
-      end
-
       private def included
         @included ||= includes.flat_map do |path|
           path.reduce(self) do |subject, key|
@@ -172,39 +151,32 @@ module JSONAPI
           @type = value.to_sym
         end
 
-        def has(name, from: name, visible: true)
+        def has(name, from: name)
           @attributes[name] = Attribute.new(
             :owner => self,
             :name => name,
-            :from => from,
-            :visible => visible
+            :from => from
           )
         end
 
-        def has_one(name, from: name, class_name:, visible: true)
+        def has_one(name, from: name, class_name:)
           @relations[name] = Relation.new(
             :owner => self,
             :type => :one,
             :name => name,
             :from => from,
-            :class_name => class_name,
-            :visible => visible
+            :class_name => class_name
           )
         end
 
-        def has_many(name, from: name, class_name:, visible: true)
+        def has_many(name, from: name, class_name:)
           @relations[name] = Relation.new(
             :owner => self,
             :type => :many,
             :name => name,
             :from => from,
-            :class_name => class_name,
-            :visible => visible
+            :class_name => class_name
           )
-        end
-
-        def context
-          const_get("Context")
         end
 
         def configuration

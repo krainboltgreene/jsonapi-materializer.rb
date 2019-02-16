@@ -9,14 +9,12 @@ module JSONAPI
         attr_accessor(:type)
         attr_accessor(:from)
         attr_accessor(:class_name)
-        attr_accessor(:visible)
 
         validates_presence_of(:owner)
         validates_presence_of(:name)
         validates_presence_of(:type)
         validates_presence_of(:from)
         validates_presence_of(:class_name)
-        validate(:visible_callable)
 
         def initialize(**keyword_arguments)
           super(**keyword_arguments)
@@ -46,14 +44,6 @@ module JSONAPI
           end
         end
 
-        def visible?(subject)
-          return visible if [true, false].include?(visible)
-          return subject.send(visible, type, self) if visible.is_a?(Symbol)
-          return visible.call(type, self) if visible.respond_to?(:call)
-
-          true
-        end
-
         private def fetch_relation(subject)
           @fetch_relationship ||= {}
           @fetch_relationship[checksum(subject)] ||= subject.object.public_send(from)
@@ -73,14 +63,6 @@ module JSONAPI
 
         private def materializer_class
           class_name.constantize
-        end
-
-        private def visible_callable
-          return if [true, false].include?(visible)
-          return if visible.is_a?(Symbol)
-          return if visible.respond_to?(:call)
-
-          errors.add(:visible, "not callable or boolean")
         end
 
         private def unlessing(object, proc)

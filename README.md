@@ -126,65 +126,6 @@ There is *nothing* specific about rails for this library, it can be used in any 
   0. A place to store the configuration at boot (rails initializers)
 
 
-### policies (aka pundit)
-
-If you're using some sort of policy logic like pundit you'll have the ability to pass it as a context to the materializer:
-
-``` ruby
-class AccountsController < ApplicationController
-  def show
-    context = {
-      :policy => policy
-    }
-    render(
-      :json => AccountMaterializer::Resource.new(:object => object, :context => context)
-    )
-  end
-end
-```
-
-And now the use of that context object:
-
-``` ruby
-class AccountMaterializer
-  include(JSONAPI::Materializer::Resource)
-
-  type(:accounts)
-
-  has_many(:reviews, :class_name => "ReviewMaterializer")
-
-  has(:name, :visible => :readable_attribute?)
-
-  private def readable_attribute?(attribute)
-    context.policy.read_attribute?(attribute.from)
-  end
-end
-```
-
-You'll notice that context is an object, not a hash, when referenced on the materializer. That's because we give you the ability to enforce the context for saftey:
-
-``` ruby
-
-class AccountMaterializer
-  include(JSONAPI::Materializer::Resource)
-
-  type(:accounts)
-
-  has_many(:reviews, :class_name => "ReviewMaterializer")
-
-  has(:name, :visible => :readable_attribute?)
-
-  context.validates_presence_of(:policy)
-
-  private def readable_attribute?(attribute)
-     context.policy.read_attribute?(attribute.from)
-  end
-end
-```
-
-These are just aliases for ActiveModel::Validations.
-
-
 ### Sister Projects
 
 I'm already using jsonapi-materializer. and it's sister project [jsonapi-realizer](https://github.com/krainboltgreene/jsonapi-realizer.rb) in a new gem of mine that allows services to be discoverable: [jsonapi-home](https://github.com/krainboltgreene/jsonapi-home.rb).
