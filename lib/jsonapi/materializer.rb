@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require("ostruct")
 require("addressable")
 require("active_model")
@@ -8,7 +10,7 @@ require("active_support/core_ext/string")
 require("active_support/core_ext/module")
 
 module JSONAPI
-  MEDIA_TYPE = "application/vnd.api+json".freeze unless const_defined?("MEDIA_TYPE")
+  MEDIA_TYPE = "application/vnd.api+json" unless const_defined?(:MEDIA_TYPE)
 
   module Materializer
     require_relative("materializer/version")
@@ -17,9 +19,9 @@ module JSONAPI
     require_relative("materializer/controller")
 
     @configuration ||= Configuration.new(
-      :default_invalid_accept_exception => JSONAPI::Materializer::Error::InvalidAcceptHeader,
-      :default_missing_accept_exception => JSONAPI::Materializer::Error::MissingAcceptHeader,
-      :default_identifier => :id
+      default_invalid_accept_exception: JSONAPI::Materializer::Error::InvalidAcceptHeader,
+      default_missing_accept_exception: JSONAPI::Materializer::Error::MissingAcceptHeader,
+      default_identifier: :id
     )
     require_relative("materializer/collection")
     require_relative("materializer/resource")

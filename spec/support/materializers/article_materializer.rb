@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 class ArticleMaterializer
   include(JSONAPI::Materializer::Resource)
 
   type(:articles)
 
-  has_one(:author, :from => :account, :class_name => "AccountMaterializer")
-  has_many(:comments, :class_name => "CommentMaterializer")
+  has_one(:author, from: :account, class_name: "AccountMaterializer")
+  has_many(:comments, class_name: "CommentMaterializer")
 
   has(:title)
 end

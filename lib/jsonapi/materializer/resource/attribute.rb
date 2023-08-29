@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module JSONAPI
   module Materializer
     module Resource
@@ -22,7 +24,9 @@ module JSONAPI
           subject.object.public_send(from)
         end
 
-        private def materializer_class
+        private
+
+        def materializer_class
           class_name.constantize
         end
       end

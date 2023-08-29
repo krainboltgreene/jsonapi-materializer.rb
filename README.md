@@ -1,10 +1,6 @@
 # jsonapi-materializer
 
-  - [![Build](http://img.shields.io/travis-ci/krainboltgreene/jsonapi-materializer.rb.svg?style=flat-square)](https://travis-ci.org/krainboltgreene/jsonapi-materializer.rb)
-  - [![Downloads](http://img.shields.io/gem/dtv/jsonapi-materializer.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-materializer)
-  - [![Version](http://img.shields.io/gem/v/jsonapi-materializer.svg?style=flat-square)](https://rubygems.org/gems/jsonapi-materializer)
-
-jsonapi-materializer is a way to turn data objects (for example, active record models) into json:api responses. Largely the library doesn't care *what* it's given, as long as it responds to certain calls.
+jsonapi-materializer is a way to turn data objects (for example, active record models) into json:api responses. Largely the library doesn't care *what* it's given, as long as it responds to certain calls. I'm already using jsonapi-materializer and it's sister project jsonapi-realizer in a gem of that allows http json services to be discoverable: [jsonapi-home](https://github.com/krainboltgreene/jsonapi-home.rb).
 
 
 ## Using
@@ -15,13 +11,6 @@ Lets say we have a simple rails application setup for our project. We'll define 
 class Account < ApplicationRecord
   has_many(:articles)
   has_many(:comments)
-
-  def self.schema
-    ActiveRecord::Migration.create_table(:accounts, :force => true) do |table|
-      table.text(:name, :null => false)
-      table.timestamps(:null => false)
-    end
-  end
 end
 ```
 
@@ -124,11 +113,6 @@ There is *nothing* specific about rails for this library, it can be used in any 
 
   0. A place to turn models into json (rails controller)
   0. A place to store the configuration at boot (rails initializers)
-
-
-### Sister Projects
-
-I'm already using jsonapi-materializer. and it's sister project [jsonapi-realizer](https://github.com/krainboltgreene/jsonapi-realizer.rb) in a new gem of mine that allows services to be discoverable: [jsonapi-home](https://github.com/krainboltgreene/jsonapi-home.rb).
 
 
 ## Installing

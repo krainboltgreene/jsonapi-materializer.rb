@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 module JSONAPI
   module Materializer
     module Collection
-      SELF_TEMPLATE = "{origin}/{type}".freeze
+      SELF_TEMPLATE = "{origin}/{type}"
 
       extend(ActiveSupport::Concern)
       include(ActiveModel::Model)
@@ -11,69 +13,74 @@ module JSONAPI
       attr_writer(:includes)
       attr_writer(:pagination)
 
-      delegate(:first_page?, :to => :object)
-      delegate(:prev_page, :to => :object)
-      delegate(:total_pages, :to => :object)
-      delegate(:next_page, :to => :object)
-      delegate(:last_page?, :to => :object)
-      delegate(:limit_value, :to => :object)
+      delegate(:first_page?, to: :object)
+      delegate(:prev_page, to: :object)
+      delegate(:total_pages, to: :object)
+      delegate(:next_page, to: :object)
+      delegate(:last_page?, to: :object)
+      delegate(:limit_value, to: :object)
 
+      # rubocop:disable Metrics/AbcSize, Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
       def as_json(*)
         {
-          :links => {
-            :first => unless total_pages.zero? || first_page? then links_pagination.expand(:offset => 1, :limit => limit_value).to_s end,
-            :prev => unless total_pages.zero? || first_page? then links_pagination.expand(:offset => prev_page, :limit => limit_value).to_s end,
-            :self => unless total_pages.zero? then links_self end,
-            :next => unless total_pages.zero? || last_page? then links_pagination.expand(:offset => next_page, :limit => limit_value).to_s end,
-            :last => unless total_pages.zero? || last_page? then links_pagination.expand(:offset => total_pages, :limit => limit_value).to_s end
+          links: {
+            first: (links_pagination.expand(offset: 1, limit: limit_value).to_s unless total_pages.zero? || first_page?),
+            prev: (links_pagination.expand(offset: prev_page, limit: limit_value).to_s unless total_pages.zero? || first_page?),
+            self: (links_self unless total_pages.zero?),
+            next: (links_pagination.expand(offset: next_page, limit: limit_value).to_s unless total_pages.zero? || last_page?),
+            last: (links_pagination.expand(offset: total_pages, limit: limit_value).to_s unless total_pages.zero? || last_page?)
           }.compact,
-          :data => resources,
-          :included => included
+          data: resources,
+          included:
         }.transform_values(&:presence).compact
       end
+      # rubocop:enable Metrics/AbcSize, Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
 
-      private def materializers
-        @materializers ||= object.map {|subobject| self.class.parent.new(:object => subobject, :selects => selects, :includes => includes)}
+      private
+
+      def materializers
+        @materializers ||= object.map { |subobject| self.class.parent.new(object: subobject, selects:, includes:) }
       end
 
-      private def links_pagination
+      def links_pagination
         Addressable::Template.new(
           "#{origin}/#{type}?page[offset]={offset}&page[limit]={limit}"
         )
       end
 
-      private def links_self
+      def links_self
         Addressable::Template.new(
           "#{origin}/#{type}"
         ).pattern
       end
 
-      private def origin
+      def origin
         self.class.parent.instance_variable_get(:@origin)
       end
 
-      private def type
+      def type
         self.class.parent.instance_variable_get(:@type)
       end
 
-      private def resources
+      def resources
         @resources ||= materializers.map(&:as_data)
       end
 
-      private def selects
+      def selects
         @selects
       end
 
-      private def includes
+      def includes
         @includes || []
       end
 
-      private def included
+      # rubocop:disable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
+      def included
         @included ||= materializers.flat_map do |materializer|
           includes.flat_map do |path|
             path.reduce(materializer) do |subject, key|
               if subject.is_a?(Array)
-                subject.map {|related_subject| related_subject.relation(key).for(related_subject)}
+                subject.map { |related_subject| related_subject.relation(key).for(related_subject) }
               else
                 subject.relation(key).for(subject)
               end
@@ -81,6 +88,7 @@ module JSONAPI
           end
         end.uniq.map(&:as_data)
       end
+      # rubocop:enable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
     end
   end
 end

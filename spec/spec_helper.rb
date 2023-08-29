@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require("pry")
 require("rspec")
 require("active_model")
@@ -9,7 +11,7 @@ JSONAPI::Materializer.configuration do |let|
   let.default_identifier = :id
 end
 
-ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
+ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 
 require_relative("support/models/application_record")
 require_relative("support/models/article")
@@ -31,7 +33,7 @@ RSpec.configure do |let|
 
   # Only run a specific file, using the ENV variable
   # Example => FILE=lib/jsonapi/materializer/version_spec.rb bundle exec rake spec
-  let.pattern = ENV["FILE"]
+  let.pattern = ENV.fetch("FILE", nil)
 
   # Show the slowest examples in the suite
   let.profile_examples = true
@@ -42,11 +44,11 @@ RSpec.configure do |let|
   # Output as a document string
   let.default_formatter = "doc"
 
-  let.before(:each) do
+  let.before do
     ApplicationRecord.descendants.each(&:setup!)
   end
 
-  let.around(:each) do |example|
+  let.around do |example|
     ActiveRecord::Base.transaction do
       example.run
       raise(ActiveRecord::Rollback)

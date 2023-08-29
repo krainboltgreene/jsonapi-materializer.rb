@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module JSONAPI
   module Materializer
     module Resource
@@ -18,46 +20,50 @@ module JSONAPI
 
         def as_json(*)
           {
-            :data => data,
-            :links => {
-              :self => links_self,
-              :related => links_related
+            data:,
+            links: {
+              self: links_self,
+              related: links_related
             },
-            :meta => {}
+            meta: {}
           }.transform_values(&:presence).compact
         end
 
-        private def links_self
+        private
+
+        def links_self
           Addressable::Template.new(
             "#{parent.links_self}/relationships/#{related.name}"
           ).pattern
         end
 
-        private def links_related
+        def links_related
           Addressable::Template.new(
             "#{parent.links_self}/#{related.name}"
           ).pattern
         end
 
-        private def data
+        # rubocop:disable Metrics/AbcSize
+        def data
           return if related_parent_materializer.blank?
 
           @data ||= if related.many?
-            related_parent_materializer.map do |child|
-              {
-                :id => child.attribute("id").for(child).to_s,
-                :type => child.type.to_s
-              }
-            end
-          else
-            {
-              :id => related_parent_materializer.attribute("id").for(related_parent_materializer).to_s,
-              :type => related_parent_materializer.type.to_s
-            }
-          end
+                      related_parent_materializer.map do |child|
+                        {
+                          id: child.attribute("id").for(child).to_s,
+                          type: child.type.to_s
+                        }
+                      end
+                    else
+                      {
+                        id: related_parent_materializer.attribute("id").for(related_parent_materializer).to_s,
+                        type: related_parent_materializer.type.to_s
+                      }
+                    end
         end
+        # rubocop:enable Metrics/AbcSize
 
-        private def related_parent_materializer
+        def related_parent_materializer
           related.for(parent)
         end
       end
