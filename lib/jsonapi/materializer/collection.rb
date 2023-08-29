@@ -20,7 +20,6 @@ module JSONAPI
       delegate(:last_page?, to: :object)
       delegate(:limit_value, to: :object)
 
-      # rubocop:disable Metrics/AbcSize, Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
       def as_json(*)
         {
           links: {

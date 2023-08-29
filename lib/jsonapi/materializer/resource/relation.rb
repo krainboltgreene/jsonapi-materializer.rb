@@ -24,7 +24,6 @@ module JSONAPI
           validate!
         end
 
-        # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
         def for(subject)
           @for ||= {}
           @for[checksum(subject)] ||= case type

@@ -42,7 +42,6 @@ module JSONAPI
         validate!
       end
 
-      # rubocop:disable Metrics/AbcSize
       def as_data
         {
           id:,

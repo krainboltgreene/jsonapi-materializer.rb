@@ -43,7 +43,6 @@ module JSONAPI
           ).pattern
         end
 
-        # rubocop:disable Metrics/AbcSize
         def data
           return if related_parent_materializer.blank?
 

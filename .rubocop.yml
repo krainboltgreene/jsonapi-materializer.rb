@@ -30,3 +30,15 @@ Naming/FileName:
   Enabled: false
 RSpec/NamedSubject:
   Enabled: false
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+Metrics/ClassLength:
+  Enabled: false
+Metrics/AbcSize:
+  Enabled: false
+Metrics/PerceivedComplexity:
+  Enabled: false
+Metrics/CyclomaticComplexity:
+  Enabled: false
+Performance/MethodObjectAsBlock:
+  Enabled: false
