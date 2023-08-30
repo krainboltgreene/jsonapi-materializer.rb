@@ -167,9 +167,7 @@ module JSONAPI
         end
       end
 
-      private
-
-      def exposed(mapping)
+      private def exposed(mapping)
         if selects.any?
           mapping.slice(*selects[type])
         else
@@ -177,27 +175,27 @@ module JSONAPI
         end
       end
 
-      def id
+      private def id
         object.public_send(identifier).to_s
       end
 
-      def attributes
+      private def attributes
         self.class.configuration.attributes
       end
 
-      def origin
+      private def origin
         self.class.configuration.origin
       end
 
-      def identifier
+      private def identifier
         self.class.configuration.identifier
       end
 
-      def relations
+      private def relations
         self.class.configuration.relations
       end
 
-      def included
+      private def included
         @included ||= includes.flat_map do |path|
           path.reduce(self) do |subject, key|
             if subject.is_a?(Array)

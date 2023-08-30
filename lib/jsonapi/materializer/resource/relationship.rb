@@ -29,9 +29,7 @@ module JSONAPI
           }.transform_values(&:presence).compact
         end
 
-        private
-
-        def links_self
+        private def links_self
           Addressable::Template.new(
             "#{parent.links_self}/relationships/#{related.name}"
           ).pattern

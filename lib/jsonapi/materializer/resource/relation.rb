@@ -59,18 +59,16 @@ module JSONAPI
           type == :one
         end
 
-        private
-
-        def fetch_relation(subject)
+        private def fetch_relation(subject)
           @fetch_relationship ||= {}
           @fetch_relationship[checksum(subject)] ||= subject.object.public_send(from)
         end
 
-        def materializer_class
+        private def materializer_class
           class_name.constantize
         end
 
-        def unlessing(object, proc)
+        private def unlessing(object, proc)
           if proc.call
             object
           else
@@ -78,7 +76,7 @@ module JSONAPI
           end
         end
 
-        def checksum(subject)
+        private def checksum(subject)
           [
             from,
             materializer_class,

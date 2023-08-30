@@ -33,48 +33,44 @@ module JSONAPI
           included:
         }.transform_values(&:presence).compact
       end
-      # rubocop:enable Metrics/AbcSize, Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
 
-      private
-
-      def materializers
-        @materializers ||= object.map { |subobject| self.class.parent.new(object: subobject, selects:, includes:) }
+      private def materializers
+        @materializers ||= object.map { |subobject| self.class.module_parent.new(object: subobject, selects:, includes:) }
       end
 
-      def links_pagination
+      private def links_pagination
         Addressable::Template.new(
           "#{origin}/#{type}?page[offset]={offset}&page[limit]={limit}"
         )
       end
 
-      def links_self
+      private def links_self
         Addressable::Template.new(
           "#{origin}/#{type}"
         ).pattern
       end
 
-      def origin
-        self.class.parent.instance_variable_get(:@origin)
+      private def origin
+        self.class.module_parent.instance_variable_get(:@origin)
       end
 
-      def type
-        self.class.parent.instance_variable_get(:@type)
+      private def type
+        self.class.module_parent.instance_variable_get(:@type)
       end
 
-      def resources
+      private def resources
         @resources ||= materializers.map(&:as_data)
       end
 
-      def selects
+      private def selects
         @selects
       end
 
-      def includes
+      private def includes
         @includes || []
       end
 
-      # rubocop:disable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
-      def included
+      private def included
         @included ||= materializers.flat_map do |materializer|
           includes.flat_map do |path|
             path.reduce(materializer) do |subject, key|
