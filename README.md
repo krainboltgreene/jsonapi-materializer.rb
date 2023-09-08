@@ -26,7 +26,7 @@ class AccountsController < ApplicationController
 
   def show
     render(
-      :json => AccountMaterializer::Resource.new(:object => object)
+      :json => AccountMaterializer.new(:object => object)
     )
   end
 end
