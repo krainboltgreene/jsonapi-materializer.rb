@@ -22,13 +22,17 @@ module JSONAPI
 
       def as_json(*)
         {
-          links: {
-            first: (links_pagination.expand(offset: 1, limit: limit_value).to_s unless total_pages.zero? || first_page?),
-            prev: (links_pagination.expand(offset: prev_page, limit: limit_value).to_s unless total_pages.zero? || first_page?),
-            self: (links_self unless total_pages.zero?),
-            next: (links_pagination.expand(offset: next_page, limit: limit_value).to_s unless total_pages.zero? || last_page?),
-            last: (links_pagination.expand(offset: total_pages, limit: limit_value).to_s unless total_pages.zero? || last_page?)
-          }.compact,
+          links: if pagination
+                   {
+                     first: (links_pagination.expand(offset: 1, limit: limit_value).to_s unless total_pages.zero? || first_page?),
+                     prev: (links_pagination.expand(offset: prev_page, limit: limit_value).to_s unless total_pages.zero? || first_page?),
+                     self: (links_self unless total_pages.zero?),
+                     next: (links_pagination.expand(offset: next_page, limit: limit_value).to_s unless total_pages.zero? || last_page?),
+                     last: (links_pagination.expand(offset: total_pages, limit: limit_value).to_s unless total_pages.zero? || last_page?)
+                   }.compact
+                 else
+                   {}
+                 end,
           data: resources,
           included:
         }.transform_values(&:presence).compact
