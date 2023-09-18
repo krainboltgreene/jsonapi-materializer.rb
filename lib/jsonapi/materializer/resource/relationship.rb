@@ -24,8 +24,7 @@ module JSONAPI
             links: {
               self: links_self,
               related: links_related
-            },
-            meta: {}
+            }
           }.transform_values(&:presence).compact
         end
 

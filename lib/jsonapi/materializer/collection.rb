@@ -22,36 +22,14 @@ module JSONAPI
 
       def as_json(*)
         {
-          links: if pagination
-                   {
-                     first: (links_pagination.expand(offset: 1, limit: limit_value).to_s unless total_pages.zero? || first_page?),
-                     prev: (links_pagination.expand(offset: prev_page, limit: limit_value).to_s unless total_pages.zero? || first_page?),
-                     self: (links_self unless total_pages.zero?),
-                     next: (links_pagination.expand(offset: next_page, limit: limit_value).to_s unless total_pages.zero? || last_page?),
-                     last: (links_pagination.expand(offset: total_pages, limit: limit_value).to_s unless total_pages.zero? || last_page?)
-                   }.compact
-                 else
-                   {}
-                 end,
-          data: resources,
-          included:
-        }.transform_values(&:presence).compact
+          links: pagination,
+          included:,
+          meta:
+        }.transform_values(&:presence).compact.merge(data: resources)
       end
 
       private def materializers
         @materializers ||= object.map { |subobject| self.class.module_parent.new(object: subobject, selects:, includes:) }
-      end
-
-      private def links_pagination
-        Addressable::Template.new(
-          "#{origin}/#{type}?page[offset]={offset}&page[limit]={limit}"
-        )
-      end
-
-      private def links_self
-        Addressable::Template.new(
-          "#{origin}/#{type}"
-        ).pattern
       end
 
       private def origin
@@ -72,6 +50,36 @@ module JSONAPI
 
       private def includes
         @includes || []
+      end
+
+      private def pagination
+        if @pagination
+          {
+            first: (pagination_link_template.expand(offset: 1, limit: limit_value).to_s unless total_pages.zero? || first_page?),
+            prev: (pagination_link_template.expand(offset: prev_page, limit: limit_value).to_s unless total_pages.zero? || first_page?),
+            self: (self_link_template unless total_pages.zero?),
+            next: (pagination_link_template.expand(offset: next_page, limit: limit_value).to_s unless total_pages.zero? || last_page?),
+            last: (pagination_link_template.expand(offset: total_pages, limit: limit_value).to_s unless total_pages.zero? || last_page?)
+          }.compact
+        else
+          {}
+        end
+      end
+
+      private def pagination_link_template
+        Addressable::Template.new(
+          "#{origin}/#{type}?page[offset]={offset}&page[limit]={limit}"
+        )
+      end
+
+      private def self_link_template
+        Addressable::Template.new(
+          "#{origin}/#{type}"
+        ).pattern
+      end
+
+      private def meta
+        {}
       end
 
       private def included
