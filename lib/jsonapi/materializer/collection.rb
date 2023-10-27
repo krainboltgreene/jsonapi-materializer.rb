@@ -13,13 +13,6 @@ module JSONAPI
       attr_writer(:includes)
       attr_writer(:pagination)
 
-      delegate(:first_page?, to: :object)
-      delegate(:prev_page, to: :object)
-      delegate(:total_pages, to: :object)
-      delegate(:next_page, to: :object)
-      delegate(:last_page?, to: :object)
-      delegate(:limit_value, to: :object)
-
       def as_json(*)
         {
           links: pagination,
@@ -55,11 +48,11 @@ module JSONAPI
       private def pagination
         if @pagination
           {
-            first: (pagination_link_template.expand(offset: 1, limit: limit_value).to_s unless total_pages.zero? || first_page?),
-            prev: (pagination_link_template.expand(offset: prev_page, limit: limit_value).to_s unless total_pages.zero? || first_page?),
-            self: (self_link_template unless total_pages.zero?),
-            next: (pagination_link_template.expand(offset: next_page, limit: limit_value).to_s unless total_pages.zero? || last_page?),
-            last: (pagination_link_template.expand(offset: total_pages, limit: limit_value).to_s unless total_pages.zero? || last_page?)
+            first: (pagination_link_template.expand(offset: 1, limit: @pagination.in).to_s unless @pagination.pages.zero? || @pagination.prev.nil?),
+            prev: (pagination_link_template.expand(offset: @pagination.prev, limit: @pagination.in).to_s unless @pagination.pages.zero? || @pagination.prev.nil?),
+            self: (pagination_link_template.expand(offset: @pagination.page, limit: @pagination.in).to_s unless @pagination.pages.zero?),
+            next: (pagination_link_template.expand(offset: @pagination.next, limit: @pagination.in).to_s unless @pagination.pages.zero? || @pagination.next.nil?),
+            last: (pagination_link_template.expand(offset: @pagination.pages, limit: @pagination.in).to_s unless @pagination.pages.zero? || @pagination.next.nil?)
           }.compact
         else
           {}
@@ -93,9 +86,8 @@ module JSONAPI
               end
             end
           end
-        end.uniq.map(&:as_data)
+        end.uniq.compact.map(&:as_data)
       end
-      # rubocop:enable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
     end
   end
 end

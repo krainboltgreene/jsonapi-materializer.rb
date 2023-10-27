@@ -45,7 +45,6 @@ module JSONAPI
                                         end
                                       end
         end
-        # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity
 
         def using(parent)
           Resource::Relationship.new(related: self, parent:)

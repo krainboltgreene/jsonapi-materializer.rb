@@ -204,7 +204,7 @@ module JSONAPI
               subject.relation(key).for(subject)
             end
           end
-        end.map(&:as_data)
+        end.compact.map(&:as_data)
       end
     end
   end

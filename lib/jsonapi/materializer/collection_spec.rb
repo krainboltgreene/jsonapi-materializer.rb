@@ -2,9 +2,26 @@
 
 require("spec_helper")
 
+PaginationAdapter = Struct.new(:in, :page, :pages, :prev, :next)
+
 RSpec.describe(JSONAPI::Materializer::Collection) do
   let(:described_class) { ArticleMaterializer::Collection }
-  let(:collection) { described_class.new(object:, includes: [["comments"], ["author"]]) }
+  let(:collection) do
+    described_class.new(
+      object:,
+      includes: [["comments"], ["author"]],
+      pagination:
+    )
+  end
+  let(:pagination) do
+    PaginationAdapter.new(
+      10, # items in page
+      9, # current page
+      10, # total pages
+      100, # previous page
+      80 # next page
+    )
+  end
 
   describe("#as_json") do
     subject { collection.as_json.deep_stringify_keys }
@@ -54,12 +71,84 @@ RSpec.describe(JSONAPI::Materializer::Collection) do
                                             }]))
       end
 
-      it("has a links key at root with pagination") do
-        expect(subject.fetch("links")).to(eq(
-                                            "self" => "http://example.com/articles",
-                                            "next" => "http://example.com/articles?page[offset]=2&page[limit]=1",
-                                            "last" => "http://example.com/articles?page[offset]=3&page[limit]=1"
-                                          ))
+      context("when on the first page") do
+        let(:pagination) do
+          PaginationAdapter.new(
+            10, # items in page
+            1, # current page
+            10, # total pages
+            nil, # previous page
+            2 # next page
+          )
+        end
+
+        it("has a links key at root with pagination") do
+          expect(subject.fetch("links")).to(eq(
+                                              "last" => "http://example.com/articles?page[offset]=10&page[limit]=10",
+                                              "next" => "http://example.com/articles?page[offset]=2&page[limit]=10",
+                                              "self" => "http://example.com/articles?page[offset]=1&page[limit]=10"
+                                            ))
+        end
+      end
+
+      context("when on the last page") do
+        let(:pagination) do
+          PaginationAdapter.new(
+            10, # items in page
+            10, # current page
+            10, # total pages
+            9, # previous page
+            nil # next page
+          )
+        end
+
+        it("has a links key at root with pagination") do
+          expect(subject.fetch("links")).to(eq(
+                                              "first" => "http://example.com/articles?page[offset]=1&page[limit]=10",
+                                              "prev" => "http://example.com/articles?page[offset]=9&page[limit]=10",
+                                              "self" => "http://example.com/articles?page[offset]=10&page[limit]=10"
+                                            ))
+        end
+      end
+
+      context("when on the middle page") do
+        let(:pagination) do
+          PaginationAdapter.new(
+            10, # items in page
+            5, # current page
+            10, # total pages
+            4, # previous page
+            6 # next page
+          )
+        end
+
+        it("has a links key at root with pagination") do
+          expect(subject.fetch("links")).to(eq(
+                                              "first" => "http://example.com/articles?page[offset]=1&page[limit]=10",
+                                              "last" => "http://example.com/articles?page[offset]=10&page[limit]=10",
+                                              "next" => "http://example.com/articles?page[offset]=6&page[limit]=10",
+                                              "prev" => "http://example.com/articles?page[offset]=4&page[limit]=10",
+                                              "self" => "http://example.com/articles?page[offset]=5&page[limit]=10"
+                                            ))
+        end
+      end
+
+      context("when on the only page") do
+        let(:pagination) do
+          PaginationAdapter.new(
+            10, # items in page
+            1, # current page
+            1, # total pages
+            nil, # previous page
+            nil # next page
+          )
+        end
+
+        it("has a links key at root with pagination") do
+          expect(subject.fetch("links")).to(eq(
+                                              "self" => "http://example.com/articles?page[offset]=1&page[limit]=10"
+                                            ))
+        end
       end
 
       it("has a included key at root with included models") do
