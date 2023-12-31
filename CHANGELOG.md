@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.1
+
+  - [bugfix] Reverting the breaking change of the previous version that raised on a relationship check
+
 ## 3.0.0
 
   - [bugfix] Having `selects` would incorrectly remove relationships that didn't match

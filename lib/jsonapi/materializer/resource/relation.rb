@@ -37,12 +37,12 @@ module JSONAPI
                                           )
                                         end
                                       when :one
-                                        raise StandardError, "couldn't find a relationship by the name #{from} on #{subject.class}" unless fetch_relation(subject).present?
-
-                                        materializer_class.new(
-                                          **subject.raw,
-                                          object: fetch_relation(subject)
-                                        )
+                                        if fetch_relation(subject).present?
+                                          materializer_class.new(
+                                            **subject.raw,
+                                            object: fetch_relation(subject)
+                                          )
+                                        end
                                       end
         end
 
