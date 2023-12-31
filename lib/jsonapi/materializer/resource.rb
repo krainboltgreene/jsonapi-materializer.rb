@@ -44,27 +44,31 @@ module JSONAPI
 
       def as_data
         {
-          id:,
-          type:,
           attributes: exposed(attributes.except(:id))
             .transform_values { |attribute| object.public_send(attribute.from) },
-          relationships: exposed(relations)
-            .transform_values { |relation| relation.using(self).as_json },
+          relationships: relations
+            .transform_values { |relation| relation.using(self).as_json }
+        }.transform_values(&:presence).compact.merge(
+          id:,
+          type:,
           links: {
             self: links_self
+            # TODO: Add more links
           }
-        }.transform_values(&:presence).compact
+        )
       end
       # rubocop:enable Metrics/AbcSize
 
       def as_json(*)
         {
+          included:
+        }.transform_values(&:presence).compact.merge(
+          data: as_data,
           links: {
             self: links_self
-          },
-          data: as_data,
-          included:
-        }.transform_values(&:presence).compact
+            # TODO: Add more links
+          }
+        )
       end
 
       def type
