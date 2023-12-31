@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.0
+
+  - [bugfix] Having `selects` would incorrectly remove relationships that didn't match
+  - [breaking] When asked for a relationship that doesn't exist it now raises an exception instead of silently returning nil
+
 ## 2.0.0
 
   - [bugfix] There were some nasty issues when including if the related data was `nil`
